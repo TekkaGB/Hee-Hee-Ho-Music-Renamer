@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>WinExe</OutputType>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\Tyler\Documents\Visual Studio 2017\Templates\ProjectTemplates\Reloaded II Mod Template\Backup\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="ModConfig.json" />
+    <None Remove="Preview.png" />
+    <None Remove="Properties\P4.tsv" />
+    <None Remove="Publish.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ModConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\P4.tsv" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Reloaded.Memory" Version="3.0.1" />
+    <PackageReference Include="Reloaded.Memory.Sigscan" Version="1.1.0" />
+    <PackageReference Include="Reloaded.Mod.Interfaces" Version="1.6.0" />
+    <PackageReference Include="Reloaded.SharedLib.Hooks" Version="1.4.0" />
+  </ItemGroup>
+</Project>

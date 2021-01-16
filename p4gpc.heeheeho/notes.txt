@@ -1,0 +1,73 @@
+82 00 -> 82 FF
+83 80 -> 83 83
+83 08 (82 88)-> start of non kanji special characters
+83 40 (82 c0)-> star
+
+83 08 -> 83 83
+
+special chars
+80 DF -> 9C 88
+80 -> FF
+
+32991 -> 40072
+
+81 80 -> 81 FF
+33152 -> 33279
+
+82 80 -> 82 FF
+33408 -> 33535
+
++127
+
+Greek Alphabet
+
+Capital CE 91 -> CE A9
+lower case CE B1 -> CE BF, CF 80 -> CF 89
+
+83 2C -> 83 2F
+EF BC 8D 
+C2 B1 
+C3 97 
+C2 B7
+
+83 30 -> 83 3F
+C3 B7 
+E2 89 A0 
+E2 89 A4 
+E2 89 A5 
+E2 88 9E 
+E2 88 B4 
+E2 99 82 
+E2 99 80 
+C2 B0 
+E2 80 B2 
+E2 80 B3 
+E2 84 83 
+C2 A5 
+C2 A2 
+C2 A3 
+C2 A7
+
+83 40 -> 83 4F
+E2 98 86 
+E2 98 85 
+E2 97 8B 
+E2 97 8F 
+E2 97 8E 
+E2 97 87 
+E2 97 86 
+E2 96 A1 
+E2 96 A0 
+E2 96 B3 
+E2 96 B2 
+E2 96 BD 
+E2 96 BC 
+E2 80 BB 
+E3 80 92 
+E2 86 92
+
+83 50 -> 83 53
+E2 86 90
+E2 86 91 
+E2 86 93 
+E3 80 93
