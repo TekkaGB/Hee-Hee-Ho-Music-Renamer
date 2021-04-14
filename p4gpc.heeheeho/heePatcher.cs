@@ -5,19 +5,14 @@ using System.Text;
 using Reloaded.Memory.Sigscan;
 using Reloaded.Memory.Sigscan.Structs;
 using Reloaded.Mod.Interfaces;
-using System.Runtime.InteropServices;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Linq.Expressions;
-using System.Linq;
 using System.Text.Json;
-using System.Globalization;
 using System.Reflection;
 using Reloaded.Memory.Sources;
 
 namespace p4gpc.heeheeho
 {
-    public class heePatcher
+    public class heePatcher : IDisposable
     {
         private Dictionary<string, byte[]> spEncoding;
         private readonly ILogger mLogger;
@@ -25,7 +20,6 @@ namespace p4gpc.heeheeho
 
         private readonly Process mProc;
         private readonly IntPtr mBaseAddr;
-        private readonly IntPtr mHnd;
         private Scanner scanner;
 
         public heePatcher(ILogger logger)
@@ -33,8 +27,8 @@ namespace p4gpc.heeheeho
             mLogger = logger;
             mProc = Process.GetCurrentProcess();
             mBaseAddr = mProc.MainModule.BaseAddress;
-            mHnd = mProc.Handle;
-            mMem = new ExternalMemory(mProc.Handle);
+            mMem = new Memory();
+            scanner = new Scanner(mProc, mProc.MainModule);
         }
 
         private byte[] newEncode(string name)
@@ -120,7 +114,6 @@ namespace p4gpc.heeheeho
                 hexNewName = tempArray;
             }
 
-            uint newNameLen = Convert.ToUInt32(hexNewName.Length);
             string songBytePattern = BitConverter.ToString(hexOriginalName).Replace("-", " ");
             var pattern = new CompiledScanPattern(songBytePattern);
             var result = scanner.CompiledFindPattern(pattern, songsOffset);
@@ -173,7 +166,6 @@ namespace p4gpc.heeheeho
                 mLogger.WriteLine("[HeeHeeHo Music Renamer] Invalid HeeHeeHo.uwus");
                 return;
             }
-            scanner = new Scanner(mProc, mProc.MainModule);
 
             string startBytePattern = BitConverter.ToString(Encoding.ASCII.GetBytes("Blank")).Replace("-", " ") + " 00";
             mLogger.WriteLine("[HeeHeeHo Music Renamer] Searching for location of songs using: " + startBytePattern);
@@ -196,8 +188,13 @@ namespace p4gpc.heeheeho
             {
                 overwrite(song);
             }
+        }
 
-            return;
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            mProc?.Dispose();
+            scanner?.Dispose();
         }
     }
 }
