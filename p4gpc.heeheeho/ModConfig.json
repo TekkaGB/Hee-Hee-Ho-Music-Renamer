@@ -2,7 +2,7 @@
   "ModId": "p4gpc.heeheeho",
   "ModName": "HeeHeeHo Music Renamer",
   "ModAuthor": "Tekka",
-  "ModVersion": "1.1.1",
+  "ModVersion": "1.2.0",
   "ModDescription": "Renames songs in Music Channel in Persona 4 Golden (Steam).",
   "ModDll": "p4gpc.heeheeho.dll",
   "ModIcon": "Preview.png",
