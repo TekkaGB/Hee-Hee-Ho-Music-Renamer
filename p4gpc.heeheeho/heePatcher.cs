@@ -100,6 +100,7 @@ namespace p4gpc.heeheeho
             byte[] hexOriginalName = Encoding.ASCII.GetBytes(song.originalName);
             byte[] hexNewName = newEncode(newName);
 
+            // Add null byte to make I'll Face Myself unique
             if (song.originalName.Equals("I'll Face Myself"))
             {
                 byte[] tempArray = new byte[hexOriginalName.Length + 1];
@@ -150,10 +151,10 @@ namespace p4gpc.heeheeho
         private int songsOffset;
         public void Patch()
         {
-            string file = Directory.GetCurrentDirectory() + @"\" + "mods" + @"\" + "SND" + @"\" + "HeeHeeHo.uwus";
+            string file = $"{Directory.GetCurrentDirectory()}/mods/SND/HeeHeeHo.uwus";
             if (!File.Exists(file))
             {
-                mLogger.WriteLine("[HeeHeeHo Music Renamer] " + file + " doesn't exist.");
+                mLogger.WriteLine($"[HeeHeeHo Music Renamer] {file} doesn't exist.");
                 return;
             }
 
@@ -168,7 +169,7 @@ namespace p4gpc.heeheeho
             }
 
             string startBytePattern = BitConverter.ToString(Encoding.ASCII.GetBytes("Blank")).Replace("-", " ") + " 00";
-            mLogger.WriteLine("[HeeHeeHo Music Renamer] Searching for location of songs using: " + startBytePattern);
+            mLogger.WriteLine($"[HeeHeeHo Music Renamer] Searching for location of songs using: {startBytePattern}");
             var pattern = new CompiledScanPattern(startBytePattern);
             var result = scanner.CompiledFindPattern(pattern, 0);
 

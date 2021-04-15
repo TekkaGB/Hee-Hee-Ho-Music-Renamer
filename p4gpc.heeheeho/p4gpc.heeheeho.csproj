@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ModConfig.json" />
-    <None Remove="Preview.png" />
     <None Remove="Properties\P4.tsv" />
     <None Remove="Publish.ps1" />
   </ItemGroup>
@@ -27,5 +26,10 @@
     <PackageReference Include="Reloaded.Memory.Sigscan" Version="1.2.1" />
     <PackageReference Include="Reloaded.Mod.Interfaces" Version="1.9.0" />
     <PackageReference Include="Reloaded.SharedLib.Hooks" Version="1.6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Preview.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
