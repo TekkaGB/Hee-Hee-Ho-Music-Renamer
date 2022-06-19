@@ -115,7 +115,6 @@ namespace p4gpc.heeheeho
                 hexNewName = tempArray;
             }
 
-            mLogger.WriteLine($"Starting to look from {songsOffset}.. for {song.originalName}");
             var songListOffset = mBaseAddr + songsOffset;
             var scanner = mFactory.CreateScanner((byte*)songListOffset, mProc.MainModule.ModuleMemorySize - songsOffset);
             string songBytePattern = BitConverter.ToString(hexOriginalName).Replace("-", " ");
