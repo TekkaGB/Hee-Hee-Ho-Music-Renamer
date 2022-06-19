@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Reloaded.Memory.Sigscan;
-using Reloaded.Memory.Sigscan.Structs;
 using Reloaded.Mod.Interfaces;
 using System.IO;
 using System.Text.Json;
 using System.Reflection;
 using Reloaded.Memory.Sources;
+using Reloaded.Memory.SigScan.ReloadedII.Interfaces;
+using Reloaded.Memory.Sigscan.Definitions;
 
 namespace p4gpc.heeheeho
 {
@@ -17,18 +17,18 @@ namespace p4gpc.heeheeho
         private Dictionary<string, byte[]> spEncoding;
         private readonly ILogger mLogger;
         private readonly IMemory mMem;
+        private readonly IScannerFactory mFactory;
 
         private readonly Process mProc;
         private readonly IntPtr mBaseAddr;
-        private Scanner scanner;
 
-        public heePatcher(ILogger logger)
+        public heePatcher(ILogger logger, IScannerFactory factory)
         {
             mLogger = logger;
             mProc = Process.GetCurrentProcess();
+            mFactory = factory;
             mBaseAddr = mProc.MainModule.BaseAddress;
             mMem = new Memory();
-            scanner = new Scanner(mProc, mProc.MainModule);
         }
 
         private byte[] newEncode(string name)
@@ -50,49 +50,49 @@ namespace p4gpc.heeheeho
             return newEncoding;
         }
 
-    private void createTable()
-    {
-        spEncoding = new Dictionary<string, byte[]>();
-        // 1 before the row where special characters start
-        string stringHex = "80CF";
-        int intFromHex;
-        
-        // Read embedded tsv file
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "p4gpc.heeheeho.Properties.P4.tsv";
-
-        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+        private void createTable()
         {
-            using (StreamReader reader = new StreamReader(stream))
+            spEncoding = new Dictionary<string, byte[]>();
+            // 1 before the row where special characters start
+            string stringHex = "80CF";
+            int intFromHex;
+        
+            // Read embedded tsv file
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "p4gpc.heeheeho.Properties.P4.tsv";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             {
-                while (!reader.EndOfStream)
+                using (StreamReader reader = new StreamReader(stream))
                 {
-                    var line = reader.ReadLine();
-                    var charStrings = line.Split('\t');
-                    foreach (string charString in charStrings)
+                    while (!reader.EndOfStream)
                     {
-                        intFromHex = int.Parse(stringHex, System.Globalization.NumberStyles.HexNumber);
-                        // Go from FF -> 80 otherwise increment
-                        if (stringHex.Substring(stringHex.Length - 2) == "FF")
-                            intFromHex += 129;
-                        else
-                            intFromHex += 1;
-                        stringHex = intFromHex.ToString("X");
-                        // Convert hex string to bytes
-                        int NumberChars = stringHex.Length;
-                        byte[] bytes = new byte[NumberChars / 2];
-                        for (int j = 0; j < NumberChars; j += 2)
-                            bytes[j / 2] = Convert.ToByte(stringHex.Substring(j, 2), 16);
-                        string charBytes = BitConverter.ToString(Encoding.UTF8.GetBytes(charString)).Replace("-", "");
-                        if (charString != "" && !spEncoding.ContainsKey(charBytes))
-                            spEncoding.Add(charBytes, bytes);
+                        var line = reader.ReadLine();
+                        var charStrings = line.Split('\t');
+                        foreach (string charString in charStrings)
+                        {
+                            intFromHex = int.Parse(stringHex, System.Globalization.NumberStyles.HexNumber);
+                            // Go from FF -> 80 otherwise increment
+                            if (stringHex.Substring(stringHex.Length - 2) == "FF")
+                                intFromHex += 129;
+                            else
+                                intFromHex += 1;
+                            stringHex = intFromHex.ToString("X");
+                            // Convert hex string to bytes
+                            int NumberChars = stringHex.Length;
+                            byte[] bytes = new byte[NumberChars / 2];
+                            for (int j = 0; j < NumberChars; j += 2)
+                                bytes[j / 2] = Convert.ToByte(stringHex.Substring(j, 2), 16);
+                            string charBytes = BitConverter.ToString(Encoding.UTF8.GetBytes(charString)).Replace("-", "");
+                            if (charString != "" && !spEncoding.ContainsKey(charBytes))
+                                spEncoding.Add(charBytes, bytes);
+                        }
                     }
                 }
             }
         }
-    }
 
-    private void overwrite(SongObject song)
+        private unsafe void overwrite(SongObject song)
         {
             if (song.newName == null)
                 return;
@@ -115,17 +115,18 @@ namespace p4gpc.heeheeho
                 hexNewName = tempArray;
             }
 
+            mLogger.WriteLine($"Starting to look from {songsOffset}.. for {song.originalName}");
+            var songListOffset = mBaseAddr + songsOffset;
+            var scanner = mFactory.CreateScanner((byte*)songListOffset, mProc.MainModule.ModuleMemorySize - songsOffset);
             string songBytePattern = BitConverter.ToString(hexOriginalName).Replace("-", " ");
-            var pattern = new CompiledScanPattern(songBytePattern);
-            var result = scanner.CompiledFindPattern(pattern, songsOffset);
-
+            var result = scanner.FindPattern(songBytePattern);
             if (result.Found)
             {
-                mMem.SafeWriteRaw(mBaseAddr + result.Offset, hexNewName);
+                mMem.SafeWriteRaw(mBaseAddr + songsOffset + result.Offset, hexNewName);
                 mLogger.WriteLine("[HeeHeeHo Music Renamer] Renamed \"" + song.originalName + "\" to \"" + newName + "\"");
             }
             else
-                mLogger.WriteLine("[HeeHeeHo Music Renamer] Couldn't find song name \"" + song.originalName +"\"");
+                mLogger.WriteLine("[HeeHeeHo Music Renamer] Couldn't find song name \"" + song.originalName + "\"");
         }
 
         private string shortenName(string name)
@@ -170,9 +171,8 @@ namespace p4gpc.heeheeho
 
             string startBytePattern = BitConverter.ToString(Encoding.ASCII.GetBytes("Blank")).Replace("-", " ") + " 00";
             mLogger.WriteLine($"[HeeHeeHo Music Renamer] Searching for location of songs using: {startBytePattern}");
-            var pattern = new CompiledScanPattern(startBytePattern);
-            var result = scanner.CompiledFindPattern(pattern, 0);
-
+            var scanner = mFactory.CreateScanner(mProc);
+            var result = scanner.FindPattern(startBytePattern);
             if (result.Found)
             {
                 songsOffset = result.Offset;
@@ -186,16 +186,13 @@ namespace p4gpc.heeheeho
 
             createTable();
             foreach (SongObject song in songs)
-            {
                 overwrite(song);
-            }
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             mProc?.Dispose();
-            scanner?.Dispose();
         }
     }
 }

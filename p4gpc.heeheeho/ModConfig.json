@@ -2,7 +2,7 @@
   "ModId": "p4gpc.heeheeho",
   "ModName": "HeeHeeHo Music Renamer",
   "ModAuthor": "Tekka",
-  "ModVersion": "1.2.0",
+  "ModVersion": "1.2.1",
   "ModDescription": "Renames songs in Music Channel in Persona 4 Golden (Steam).",
   "ModDll": "p4gpc.heeheeho.dll",
   "ModIcon": "Preview.png",
@@ -10,7 +10,7 @@
   "ModR2RManagedDll64": "x64/p4gpc.heeheeho.dll",
   "ModNativeDll32": "",
   "ModNativeDll64": "",
-  "ModDependencies": [ "reloaded.sharedlib.hooks", "reloaded.universal.steamhook" ],
+  "ModDependencies": [ "reloaded.sharedlib.hooks", "Reloaded.Memory.SigScan.ReloadedII" ],
   "OptionalDependencies": null,
   "SupportedAppId": [ "p4g.exe" ]
 }
